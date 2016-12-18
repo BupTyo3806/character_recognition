@@ -11,6 +11,10 @@ Net save into ***net.xml*** file. If file exist, net will not train, only to wor
 * /learn - learning data
 * /test - testing data
 
+## Pattern for files:
+* ([a-zA-z0-9]+)-L.png for learn data
+* ([a-zA-z0-9]+)-T.png for test data
+
 ## Required packages
 
 * PyQt4@4.11.4
