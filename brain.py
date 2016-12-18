@@ -17,13 +17,13 @@ from pybrain.supervised.trainers import RPropMinusTrainer
 data_dir = ""
 
 
-def init_brain(learn_data, epochs, TrainerClass=BackpropTrainer):
+def init_brain(learn_data, epochs, hidden_count, TrainerClass=BackpropTrainer):
     global data_dir
     print("\t Epochs: ", epochs)
     if learn_data is None:
         return None
     print("Building network")
-    net = buildNetwork(7 * 7, 7, 4, hiddenclass=SigmoidLayer)
+    net = buildNetwork(7 * 7, hidden_count, 4, hiddenclass=SigmoidLayer)
     # net = buildNetwork(64 * 64, 32 * 32, 8 * 8, 5)
     # net = buildNetwork(64 * 64, 5, hiddenclass=LinearLayer)
     # fill dataset with learn data
@@ -45,7 +45,7 @@ def init_brain(learn_data, epochs, TrainerClass=BackpropTrainer):
     trainer.trainEpochs(epochs=epochs)
     end = time.time()
 
-    f = open(data_dir + "values.txt", "w")
+    f = open(data_dir + "/values.txt", "w")
     f.write("Training time: %.2f \n" % (end - start))
     f.write("Total epochs: %s \n" % (trainer.totalepochs))
     # f.write("Error: %.22f" % (trainer.trainingErrors[len(trainer.trainingErrors) - 1]))
@@ -53,7 +53,7 @@ def init_brain(learn_data, epochs, TrainerClass=BackpropTrainer):
 
     print("Percent of error: ", percentError(trainer.testOnClassData(), ds['class']))
     print("\tOk. We have trained our network.")
-    NetworkWriter.writeToFile(net, data_dir + "net.xml")
+    NetworkWriter.writeToFile(net, data_dir + "/net.xml")
     return net
 
 
@@ -120,12 +120,13 @@ def main():
     app = QApplication([])
     p = argparse.ArgumentParser(description='PyBrain example')
     p.add_argument('-d', '--data-dir', default="./", help="Path to dir, containing data")
+    p.add_argument('-n', '--hidden-count', default="4", help="Neuron on hidden layer")
     p.add_argument('-e', '--epochs', default="1000",
                    help="Number of epochs for teach, use 0 for learning until convergence")
     args = p.parse_args()
-    data_dir = args.data_dir
-    learn_path = os.path.abspath(data_dir) + "/learn/"
-    test_path = os.path.abspath(data_dir) + "/test/"
+    data_dir = os.path.abspath(args.data_dir)
+    learn_path = data_dir + "/learn/"
+    test_path = data_dir + "/test/"
     if not os.path.exists(learn_path):
         print("Error: Learn directory not exists!")
         sys.exit(1)
@@ -136,10 +137,10 @@ def main():
     test_data = loadData(test_path)
     # net = init_brain(learn_data, int(args.epochs), TrainerClass=RPropMinusTrainer)
     try:
-        net = NetworkReader.readFrom(data_dir + "net.xml")
+        net = NetworkReader.readFrom(data_dir + "/net.xml")
     except FileNotFoundError:
         print("Create net")
-        net = init_brain(learn_data, int(args.epochs), TrainerClass=BackpropTrainer)
+        net = init_brain(learn_data, int(args.epochs), int(args.hidden_count), TrainerClass=BackpropTrainer)
     print("Now we get working network. Let's try to use it on learn_data.")
     print("Here comes a tests on learn-data!")
     test_brain(net, learn_data)
